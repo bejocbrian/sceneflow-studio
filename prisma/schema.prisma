@@ -1,6 +1,3 @@
-// This is your Prisma schema file
-// Learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,153 +7,91 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model - represents a SceneFlow Studio account
+// User model (created externally in Supabase Auth)
 model User {
-  id                 String @id @default(cuid())
-  email              String @unique
-  name               String
-  tier               String @default("creator") // "creator", "professional", "enterprise"
-  subscriptionStatus String @default("active")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  projects Project[]
-
-  @@index([email])
+  id              String   @id @default(uuid())
+  email           String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  projects        Project[]
+  generations     Generation[]
+  
   @@map("users")
 }
 
-// Blueprint model - represents template types for silent content
+// Blueprint templates for different scene types
 model Blueprint {
-  id          String  @id @default(cuid())
-  type        String  @unique // "silent_property_tour", "product_demo", "ambient_loop", "process_visualization"
-  name        String // "Silent Property Tour", "Product Visualization", etc.
-  description String?
-  icon        String? // emoji or icon name
-
-  // Scene types this blueprint supports
-  sceneTypes String[] // ["entrance", "living_room", "kitchen", "bedroom", "bathroom", "exterior"]
-
-  // Default configuration for this blueprint
-  defaultConfig Json // { cameraDefaults: {}, audioDefaults: {}, etc }
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  projects Project[]
-
+  id              String   @id @default(uuid())
+  type            String   @unique // slug identifier (e.g., "silent_property_tour")
+  name            String   // human-readable name
+  description     String   // description of the template
+  icon            String   // emoji icon for UI
+  sceneTypes      String[] // array of scene type strings
+  defaultConfig   Json     // JSON configuration for blueprint
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  projects        Project[]
+  
   @@map("blueprints")
 }
 
-// Project model - represents a user's video project
+// Video projects
 model Project {
-  id          String @id @default(cuid())
-  userId      String
-  blueprintId String
-
-  // Relations
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  blueprint Blueprint @relation(fields: [blueprintId], references: [id])
-
-  // Project metadata
-  title       String
-  description String?
-
-  // Visual parameters per scene
-  // Structure: { "scene_name": { camera, lighting, focusObjects, etc } }
-  visualParams Json @default("{}")
-
-  // Audio profile configuration
-  // Structure: { ambience_type: "room_tone", sound_emphasis: [], etc }
-  audioProfile Json @default("{}")
-
-  // Ordered list of scene names
-  sequenceOrder String[] @default([])
-
-  // Optional reference image URL (from Supabase Storage)
-  referenceImageUrl String?
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  generations Generation[]
-
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  blueprintId     String
+  userId          String
+  config          Json     // project-specific config override
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  blueprint       Blueprint @relation(fields: [blueprintId], references: [id])
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  generations     Generation[]
+  
   @@index([userId])
   @@index([blueprintId])
   @@map("projects")
 }
 
-// Generation model - stores generated prompts and video metadata
+// Video generation history
 model Generation {
-  id        String @id @default(cuid())
-  projectId String
-
-  // Relations
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  // Generation status
-  status String @default("draft") // "draft", "prompt_ready", "coming_soon"
-
-  // Generated AI prompt (for future video generation)
-  // Structure: { scenes: [...], template_version: "1.0", etc }
-  aiPrompt Json?
-
-  // Exported prompt as readable text (can be downloaded as JSON)
-  exportedPrompt String?
-  exportedAt     DateTime?
-
-  // Mock video URL (placeholder for future use)
-  mockVideoUrl String?
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
+  id              String   @id @default(uuid())
+  projectId       String
+  prompt          String   // generated prompt text
+  resultUrl       String?
+  status          String   // pending, processing, completed, failed
+  metadata        Json?    // additional generation metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  
   @@index([projectId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
   @@map("generations")
 }
 
-// SoundLibrary model - stores available ambient sounds and effects
+// Sound library for audio options
 model SoundLibrary {
-  id          String  @id @default(cuid())
-  name        String // "Rain on window", "Coffee brewing", etc.
-  description String?
-  category    String // "ambient", "material", "footsteps", "nature", "mechanical"
-  tier        String  @default("all") // "all", "professional", "enterprise"
-
-  // In MVP, this is just a reference
-  // In Phase 2, will link to actual audio files in Supabase Storage
-  audioUrl String?
-  duration Int? // duration in seconds
-
+  id              String   @id @default(uuid())
+  name            String   @unique
+  category        String   // ambient, footsteps, material, nature
+  tier            String   // free, professional, premium
+  description     String?
+  duration        Int?     // duration in seconds
+  url             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
   @@index([category])
+  @@index([tier])
   @@map("sound_library")
 }
-
-// Optional: ConsistencyState model (for future AI enhancement)
-// Currently not needed for MVP, but included for reference
-// model ConsistencyState {
-//   id            String    @id @default(cuid())
-//   generationId  String    @unique
-//   
-//   // Spatial memory
-//   cameraPosition Json
-//   objectPlacement Json
-//   
-//   // Lighting continuity
-//   lightSources  Json
-//   ambientLevel  Float
-//   
-//   // Temporal logic
-//   timeOfDay     String
-//   weatherState  String?
-//   
-//   // Scene transition
-//   lastSceneName String
-//   nextSceneName String?
-//   
-//   @@map("consistency_states")
-// }
