@@ -1,0 +1,15 @@
+{
+  "name": "sceneflow-studio",
+  "version": "0.1.0",
+  "description": "SceneFlow Studio - Silent content generation platform",
+  "scripts": {
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0",
+    "typescript": "^5.0.0"
+  }
+}
