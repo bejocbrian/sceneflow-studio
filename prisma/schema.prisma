@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model (created externally in Supabase Auth)
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  projects        Project[]
+  generations     Generation[]
+  
+  @@map("users")
+}
+
+// Blueprint templates for different scene types
+model Blueprint {
+  id              String   @id @default(uuid())
+  type            String   @unique // slug identifier (e.g., "silent_property_tour")
+  name            String   // human-readable name
+  description     String   // description of the template
+  icon            String   // emoji icon for UI
+  sceneTypes      String[] // array of scene type strings
+  defaultConfig   Json     // JSON configuration for blueprint
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  projects        Project[]
+  
+  @@map("blueprints")
+}
+
+// Video projects
+model Project {
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  blueprintId     String
+  userId          String
+  config          Json     // project-specific config override
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  blueprint       Blueprint @relation(fields: [blueprintId], references: [id])
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  generations     Generation[]
+  
+  @@index([userId])
+  @@index([blueprintId])
+  @@map("projects")
+}
+
+// Video generation history
+model Generation {
+  id              String   @id @default(uuid())
+  projectId       String
+  prompt          String   // generated prompt text
+  resultUrl       String?
+  status          String   // pending, processing, completed, failed
+  metadata        Json?    // additional generation metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("generations")
+}
+
+// Sound library for audio options
+model SoundLibrary {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  category        String   // ambient, footsteps, material, nature
+  tier            String   // free, professional, premium
+  description     String?
+  duration        Int?     // duration in seconds
+  url             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([category])
+  @@index([tier])
+  @@map("sound_library")
+}
