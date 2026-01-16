@@ -1,97 +1,36 @@
-# SceneFlow Studio
-
-A modern video production platform built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and shadcn/ui.
-
-## Tech Stack
-
-- **Next.js 16** - React framework with App Router
-- **React 19** - Latest React with improved performance
-- **TypeScript** - Type-safe development with strict mode
-- **Tailwind CSS v4** - Utility-first CSS framework
-- **shadcn/ui** - Beautiful, accessible component library
-- **ESLint** - Code linting with Next.js rules
-- **Prettier** - Code formatting with Tailwind plugin
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js 20+
-- npm or yarn or pnpm
-
-### Installation
+First, run the development server:
 
 ```bash
-# Install dependencies
-npm install
-
-# Run development server
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Available Scripts
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Project Structure
+## Learn More
 
-```
-sceneflow-studio/
-├── app/              # Next.js App Router pages
-│   ├── layout.tsx    # Root layout
-│   ├── page.tsx      # Home page
-│   └── globals.css   # Global styles with Tailwind directives
-├── components/       # React components
-│   └── ui/          # shadcn/ui components
-├── lib/             # Utility functions
-├── prisma/          # Database schema (to be added)
-├── public/          # Static assets
-└── ...
-```
+To learn more about Next.js, take a look at the following resources:
 
-## Components
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-The following shadcn/ui components are installed:
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-- Button
-- Card
-- Input
-- Label
-- Form
+## Deploy on Vercel
 
-## Development
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### Adding New Components
-
-To add new shadcn/ui components:
-
-```bash
-npx shadcn@latest add [component-name]
-```
-
-### Code Quality
-
-All code is formatted with Prettier and linted with ESLint. Before committing:
-
-```bash
-# Format code
-npm run format
-
-# Check for lint errors
-npm run lint
-```
-
-## Deployment
-
-This project is ready for deployment on Vercel. Follow the standard Next.js deployment process.
-
-## License
-
-[Your License Here]
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

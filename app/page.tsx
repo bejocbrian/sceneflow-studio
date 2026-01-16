@@ -1,97 +1,96 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+"use client";
+
+import React, { useState } from "react";
+import { PromptForm } from "@/components/PromptForm";
+import { PromptDisplay } from "@/components/PromptDisplay";
+import { Film } from "lucide-react";
 
 export default function Home() {
+  const [generatedPrompts, setGeneratedPrompts] = useState<Record<string, string> | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGenerate = async (formData: any) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/generate-prompts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to generate prompts");
+      }
+
+      const data = await response.json();
+      setGeneratedPrompts(data);
+      
+      // Scroll to results
+      setTimeout(() => {
+        document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center">
-      <main className="w-full max-w-4xl px-6 py-12">
-        <div className="flex flex-col items-center gap-8">
-          <div className="text-center">
-            <h1 className="text-foreground text-4xl font-bold tracking-tight sm:text-5xl">
-              Welcome to SceneFlow Studio
-            </h1>
-            <p className="text-muted-foreground mt-4 text-lg">
-              A modern video production platform built with Next.js 16, React 19, and shadcn/ui
-            </p>
+    <main className="max-w-5xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <header className="text-center mb-12">
+        <div className="flex justify-center mb-4">
+          <div className="bg-indigo-600 p-3 rounded-2xl shadow-lg">
+            <Film className="h-8 w-8 text-white" />
           </div>
-
-          <div className="grid w-full gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Component Showcase</CardTitle>
-                <CardDescription>Demonstrating shadcn/ui components</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Enter your email" />
-                </div>
-                <div className="flex gap-2">
-                  <Button>Primary Button</Button>
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="outline">Outline</Button>
-                  <Button variant="ghost">Ghost</Button>
-                </div>
-                <Button variant="destructive">Destructive</Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Tech Stack</CardTitle>
-                <CardDescription>Powered by modern technologies</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-muted-foreground space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
-                    Next.js 16 with App Router
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
-                    React 19
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
-                    TypeScript with strict mode
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
-                    Tailwind CSS v4
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
-                    shadcn/ui components
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="bg-primary h-1.5 w-1.5 rounded-full"></span>
-                    ESLint & Prettier
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Getting Started</CardTitle>
-              <CardDescription>
-                Your SceneFlow Studio foundation is ready for development
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted rounded-lg p-4">
-                <code className="text-foreground text-sm">npm run dev</code>
-              </div>
-              <p className="text-muted-foreground mt-4 text-sm">
-                The development server will start at http://localhost:3000
-              </p>
-            </CardContent>
-          </Card>
         </div>
-      </main>
-    </div>
+        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
+          SceneFlow Studio
+        </h1>
+        <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+          Transform visual parameters into optimized AI video prompts for silent property tours.
+        </p>
+      </header>
+
+      <div className="space-y-12">
+        <section>
+          <div className="flex items-center space-x-2 mb-6">
+            <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              Step 1
+            </span>
+            <h2 className="text-2xl font-bold text-gray-800">Blueprint: Silent Property Tour</h2>
+          </div>
+          <PromptForm onGenerate={handleGenerate} isLoading={isLoading} />
+        </section>
+
+        {error && (
+          <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-md">
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        )}
+
+        {generatedPrompts && (
+          <section id="results" className="scroll-mt-12 transition-all">
+            <div className="flex items-center space-x-2 mb-6">
+              <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Step 2
+              </span>
+              <h2 className="text-2xl font-bold text-gray-800">Generated AI Prompts</h2>
+            </div>
+            <PromptDisplay prompts={generatedPrompts} />
+          </section>
+        )}
+      </div>
+
+      <footer className="mt-24 text-center text-gray-400 text-sm">
+        <p>© {new Date().getFullYear()} SceneFlow Studio. All rights reserved.</p>
+        <p className="mt-2 italic">Silent property tours optimized for Veo, Sora, Grok, and Meta AI.</p>
+      </footer>
+    </main>
   );
 }
